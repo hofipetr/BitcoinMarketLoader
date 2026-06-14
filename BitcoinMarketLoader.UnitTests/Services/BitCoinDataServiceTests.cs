@@ -78,6 +78,26 @@ public class BitCoinDataServiceTests
             .ConvertEurToCzk(Arg.Is<MarketTick>(t => t.Ccseq == btcData.Ccseq && t.Price == btcData.Price));
     }
 
+    [Fact]
+    public async Task DeleteMarketTickRemovesPersistedTick()
+    {
+        Assert.True(await _sut.DeleteBtcMarketTickAsync(1));
+        Assert.Null(await _repository.GetMarketTick(1));
+        Assert.False(await _sut.DeleteBtcMarketTickAsync(1));
+    }
+
+    [Fact]
+    public async Task DeleteMarketTicksReturnsNumberOfRemovedTicks()
+    {
+        await _repository.AddMarketTick(CreateMarketTick(2));
+        await _repository.AddMarketTick(CreateMarketTick(3));
+
+        var deletedCount = await _sut.DeleteBtcMarketTicksAsync([1, 3, 999]);
+
+        Assert.Equal(2, deletedCount);
+        Assert.NotNull(await _repository.GetMarketTick(2));
+    }
+
     private static MarketTick CreateMarketTick(long ccseq) =>
         new()
         {

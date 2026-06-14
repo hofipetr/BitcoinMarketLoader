@@ -107,6 +107,28 @@ public class InMemoryMarketRepository : IMarketRepository
         }
     }
 
+    public Task<bool> DeleteMarketTick(long ccseq)
+    {
+        lock (_syncRoot)
+        {
+            return Task.FromResult(_marketTicks.Remove(ccseq));
+        }
+    }
+
+    public Task<int> DeleteMarketTicks(IReadOnlyCollection<long> ccseqs)
+    {
+        ArgumentNullException.ThrowIfNull(ccseqs);
+
+        lock (_syncRoot)
+        {
+            var deletedCount = ccseqs
+                .Distinct()
+                .Count(ccseq => _marketTicks.Remove(ccseq));
+
+            return Task.FromResult(deletedCount);
+        }
+    }
+
     private static MarketTick CloneMarketTick(MarketTick source, bool includeDetails) =>
         new()
         {

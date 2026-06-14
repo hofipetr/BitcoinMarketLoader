@@ -28,6 +28,7 @@
 
 .controls {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 1.5rem;
     padding: 0.8rem 1rem;
@@ -54,6 +55,19 @@
 .auto-refresh-control .form-check-input {
     margin: 0;
     cursor: pointer;
+    border-color: #5f584d;
+    background-color: #f2eee6;
+    box-shadow: 0 0 0 1px rgba(44, 38, 29, 0.12);
+}
+
+.auto-refresh-control .form-check-input:checked {
+    border-color: #8a5700;
+    background-color: #8a5700;
+}
+
+.auto-refresh-control .form-check-input:focus {
+    border-color: #8a5700;
+    box-shadow: 0 0 0 0.2rem rgba(197, 123, 0, 0.25);
 }
 
 .auto-refresh-control .form-check-input:disabled {
@@ -192,9 +206,61 @@
     cursor: pointer;
 }
 
-.identifier {
+.selection-row {
+    cursor: default;
+}
+
+.row-action-heading,
+.row-action-cell {
     position: sticky;
     left: 0;
+    width: 6.5rem;
+    min-width: 6.5rem;
+    text-align: center;
+}
+
+.row-action-heading {
+    z-index: 3 !important;
+}
+
+.row-action-cell {
+    z-index: 2;
+    background: white;
+}
+
+.row-action-cell .form-check-input {
+    border-color: #5f584d;
+    background-color: #f2eee6;
+    box-shadow: 0 0 0 1px rgba(44, 38, 29, 0.12);
+}
+
+.row-action-cell .form-check-input:checked {
+    border-color: #8a5700;
+    background-color: #8a5700;
+}
+
+.row-action-cell .form-check-input:focus {
+    border-color: #8a5700;
+    box-shadow: 0 0 0 0.2rem rgba(197, 123, 0, 0.25);
+}
+
+.delete-row-button {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+}
+
+.trash-icon {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+}
+
+.identifier {
+    position: sticky;
+    left: 6.5rem;
     z-index: 1;
     background: white;
     color: #795000;
@@ -202,8 +268,8 @@
     font-weight: 700;
 }
 
-th:first-child {
-    left: 0;
+th:nth-child(2) {
+    left: 6.5rem;
     z-index: 2;
 }
 

@@ -47,4 +47,18 @@ public interface IMarketRepository
     /// <param name="note">The new note to set</param>
     /// <returns>True if the record was updated successfully, false otherwise</returns>
     Task<bool> UpdateTickNote(long ccseq, string? note);
+
+    /// <summary>
+    /// Delete a single <see cref="MarketTick"/>.
+    /// </summary>
+    /// <param name="ccseq">The sequence number of the market tick to delete</param>
+    /// <returns>True if the record was deleted, false if it was not found</returns>
+    Task<bool> DeleteMarketTick(long ccseq);
+
+    /// <summary>
+    /// Delete multiple <see cref="MarketTick"/> records.
+    /// </summary>
+    /// <param name="ccseqs">Sequence numbers of the market ticks to delete</param>
+    /// <returns>The number of deleted records</returns>
+    Task<int> DeleteMarketTicks(IReadOnlyCollection<long> ccseqs);
 }

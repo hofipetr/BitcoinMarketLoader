@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using BitcoinMarketLoader.Application.Enums;
 using BitcoinMarketLoader.Application.Models;
 using BitcoinMarketLoader.Domain.Market;
@@ -18,8 +17,6 @@ public class BitCoinDataService(
 {
     private const string CoinbaseMarket = "coinbase";
     private const string BtcInstrument = "BTC-EUR";
-    private const string EurCurrency = "EUR";
-    private const string CzkCurrency = "CZK";
 
     public async Task<MarketTick?> FetchLatestBtcMarketTickAsync(
         CurrencyCodes currencyCodes,
@@ -142,6 +139,41 @@ public class BitCoinDataService(
         {
             logger.LogError(ex, "Error updating note of market tick {tickId}", marketTickId);
             return false;
+        }
+    }
+
+    public async Task<bool> DeleteBtcMarketTickAsync(long marketTickId)
+    {
+        try
+        {
+            return await marketRepository
+                .DeleteMarketTick(marketTickId)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error deleting market tick {tickId}", marketTickId);
+            return false;
+        }
+    }
+
+    public async Task<int> DeleteBtcMarketTicksAsync(IReadOnlyCollection<long> marketTickIds)
+    {
+        ArgumentNullException.ThrowIfNull(marketTickIds);
+
+        try
+        {
+            return await marketRepository
+                .DeleteMarketTicks(marketTickIds)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Error deleting batch of {tickCount} market ticks",
+                marketTickIds.Count);
+            return 0;
         }
     }
 

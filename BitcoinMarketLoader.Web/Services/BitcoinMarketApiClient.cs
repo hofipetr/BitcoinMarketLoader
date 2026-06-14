@@ -59,5 +59,52 @@ public sealed class BitcoinMarketApiClient(HttpClient httpClient)
         }
     }
 
+    public async Task DeleteMarketTickAsync(
+        long marketTickId,
+        CancellationToken cancellationToken = default)
+    {
+        using var response = await httpClient
+            .DeleteAsync($"btcTicks/{marketTickId}", cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException(
+                $"The API returned {(int)response.StatusCode} {response.ReasonPhrase}.");
+        }
+    }
+
+    public async Task<int> DeleteMarketTicksAsync(
+        IReadOnlyCollection<long> marketTickIds,
+        CancellationToken cancellationToken = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Delete, "btcTicks")
+        {
+            Content = JsonContent.Create(
+                new DeleteMarketTicksRequest(marketTickIds),
+                options: JsonOptions),
+        };
+        using var response = await httpClient
+            .SendAsync(request, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException(
+                $"The API returned {(int)response.StatusCode} {response.ReasonPhrase}.");
+        }
+
+        var result = await response.Content
+            .ReadFromJsonAsync<DeleteMarketTicksResponse>(
+                JsonOptions,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return result?.DeletedCount
+            ?? throw new InvalidOperationException("The delete API returned an empty response.");
+    }
+
     private sealed record UpdateMarketTickNoteRequest(string? Note);
+    private sealed record DeleteMarketTicksRequest(IReadOnlyCollection<long> Ccseqs);
+    private sealed record DeleteMarketTicksResponse(int DeletedCount);
 }

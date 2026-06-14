@@ -1,6 +1,8 @@
 using BitcoinMarketLoader.Application.Extensions;
 using BitcoinMarketLoader.Api.BackgroundServices;
+using BitcoinMarketLoader.Infrastructure.Databases;
 using BitcoinMarketLoader.Infrastructure.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using NLog.Web;
 
@@ -15,6 +17,7 @@ builder.Logging.AddNLogWeb(nlogConfigFile);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHealthChecks();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -34,6 +37,17 @@ builder.Services.AddHostedService<MarketTickPollingBackgroundService>();
 
 var app = builder.Build();
 
+var applyMigrations = builder.Configuration.GetValue<bool>("Database:ApplyMigrations");
+var useInMemoryRepositories =
+    builder.Configuration.GetValue<bool>("useInMemoryRepositories");
+
+if (applyMigrations && !useInMemoryRepositories)
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<MainDbContext>();
+    await dbContext.Database.MigrateAsync();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -47,6 +61,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 app.Run();

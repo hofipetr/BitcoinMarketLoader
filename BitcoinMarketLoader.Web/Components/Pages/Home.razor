@@ -4,6 +4,7 @@
 @using BitcoinMarketLoader.Models
 @using BitcoinMarketLoader.Services
 @inject BitcoinMarketApiClient ApiClient
+@inject IJSRuntime JsRuntime
 
 <PageTitle>BTC market ticks</PageTitle>
 
@@ -16,9 +17,34 @@
         </div>
 
         <div class="controls">
+            @if (isEditMode)
+            {
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger"
+                        disabled="@(isDeleting || selectedTickIds.Count == 0)"
+                        @onclick="DeleteSelectedAsync">
+                    Delete selected (@selectedTickIds.Count)
+                </button>
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        disabled="@isDeleting"
+                        @onclick="CancelEditMode">
+                    Cancel
+                </button>
+            }
+            else
+            {
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        disabled="@(isLoading || ticks.Count == 0)"
+                        @onclick="EnableEditMode">
+                    Edit mode
+                </button>
+            }
+
             <button type="button"
                     class="btn btn-sm btn-outline-secondary"
-                    disabled="@isLoading"
+                    disabled="@(isLoading || isDeleting)"
                     @onclick="LoadTicksAsync">
                 Refresh
             </button>
@@ -29,7 +55,7 @@
                        type="checkbox"
                        role="switch"
                        checked="@autoRefreshEnabled"
-                       disabled="@(pollingIntervalSeconds <= 0)"
+                       disabled="@(pollingIntervalSeconds <= 0 || isEditMode)"
                        @onchange="ChangeAutoRefreshAsync"/>
             </label>
 
@@ -38,7 +64,7 @@
                 <select class="form-select form-select-sm"
                         value="@pageSize"
                         @onchange="ChangePageSizeAsync"
-                        disabled="@isLoading">
+                        disabled="@(isLoading || isDeleting)">
                     @foreach (var size in PageSizes)
                     {
                         <option value="@size">@size</option>
@@ -52,14 +78,14 @@
                 <button type="button"
                         class="@CurrencySegmentClass("CZK")"
                         aria-pressed="@(currency == "CZK")"
-                        disabled="@isLoading"
+                        disabled="@(isLoading || isDeleting)"
                         @onclick='() => ChangeCurrencyAsync("CZK")'>
                     CZK
                 </button>
                 <button type="button"
                         class="@CurrencySegmentClass("EUR")"
                         aria-pressed="@(currency == "EUR")"
-                        disabled="@isLoading"
+                        disabled="@(isLoading || isDeleting)"
                         @onclick='() => ChangeCurrencyAsync("EUR")'>
                     EUR
                 </button>
@@ -114,6 +140,9 @@
             <table class="market-grid details-grid">
                 <thead>
                 <tr>
+                    <th class="row-action-heading">
+                        @(isEditMode ? "Select" : "Delete")
+                    </th>
                     <th>CCSEQ</th>
                     <th>Generated</th>
                     <th>Market</th>
@@ -133,9 +162,35 @@
                 <tbody>
                 @foreach (var tick in ticks)
                 {
-                    <tr class="editable-row"
-                        title="Edit market tick note"
-                        @onclick="() => OpenNoteEditor(tick)">
+                    <tr class="@TickRowClass"
+                        title="@TickRowTitle"
+                        @onclick="() => HandleTickRowClick(tick)">
+                        <td class="row-action-cell">
+                            @if (isEditMode)
+                            {
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       checked="@selectedTickIds.Contains(tick.Ccseq)"
+                                       aria-label="Select market tick @tick.Ccseq"
+                                       @onclick:stopPropagation="true"
+                                       @onchange="args => ChangeTickSelection(tick.Ccseq, args)"/>
+                            }
+                            else
+                            {
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger delete-row-button"
+                                        disabled="@isDeleting"
+                                        aria-label="Delete market tick @tick.Ccseq"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => DeleteTickAsync(tick)">
+                                    <svg class="trash-icon"
+                                         viewBox="0 0 24 24"
+                                         aria-hidden="true">
+                                        <path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 12H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/>
+                                    </svg>
+                                </button>
+                            }
+                        </td>
                         <td class="identifier">@tick.Ccseq</td>
                         <td>@FormatDate(tick.GeneratedTimestamp)</td>
                         <td>@Value(tick.Market)</td>
@@ -163,6 +218,9 @@
             <table class="market-grid statistics-grid">
                 <thead>
                 <tr>
+                    <th class="row-action-heading">
+                        @(isEditMode ? "Select" : "Delete")
+                    </th>
                     <th>CCSEQ</th>
                     <th>Open</th>
                     <th>High</th>
@@ -190,9 +248,35 @@
                 @foreach (var tick in ticks)
                 {
                     var statistics = GetStatistics(tick, range);
-                    <tr class="editable-row"
-                        title="Edit market tick note"
-                        @onclick="() => OpenNoteEditor(tick)">
+                    <tr class="@TickRowClass"
+                        title="@TickRowTitle"
+                        @onclick="() => HandleTickRowClick(tick)">
+                        <td class="row-action-cell">
+                            @if (isEditMode)
+                            {
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       checked="@selectedTickIds.Contains(tick.Ccseq)"
+                                       aria-label="Select market tick @tick.Ccseq"
+                                       @onclick:stopPropagation="true"
+                                       @onchange="args => ChangeTickSelection(tick.Ccseq, args)"/>
+                            }
+                            else
+                            {
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger delete-row-button"
+                                        disabled="@isDeleting"
+                                        aria-label="Delete market tick @tick.Ccseq"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => DeleteTickAsync(tick)">
+                                    <svg class="trash-icon"
+                                         viewBox="0 0 24 24"
+                                         aria-hidden="true">
+                                        <path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10l-1 12H8L7 9Zm3 2v7h2v-7h-2Zm4 0v7h2v-7h-2Z"/>
+                                    </svg>
+                                </button>
+                            }
+                        </td>
                         <td class="identifier">@tick.Ccseq</td>
                         @if (statistics is null)
                         {
@@ -230,13 +314,13 @@
 
     <div class="pagination-bar">
         <button class="btn btn-outline-secondary btn-sm"
-                disabled="@(isLoading || page <= 1)"
+                disabled="@(isLoading || isDeleting || page <= 1)"
                 @onclick="PreviousPageAsync">
             Previous
         </button>
         <span>Showing @FirstItem-@LastItem of @totalCount</span>
         <button class="btn btn-outline-secondary btn-sm"
-                disabled="@(isLoading || page >= totalPages)"
+                disabled="@(isLoading || isDeleting || page >= totalPages)"
                 @onclick="NextPageAsync">
             Next
         </button>
@@ -283,6 +367,10 @@
     private Task? autoRefreshTask;
     private readonly SemaphoreSlim loadLock = new(1, 1);
     private MarketTickDto? selectedTick;
+    private readonly HashSet<long> selectedTickIds = [];
+    private bool isEditMode;
+    private bool isDeleting;
+    private bool autoRefreshBeforeEditMode;
 
     private int totalPages => Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
     private int FirstItem => totalCount == 0 ? 0 : ((page - 1) * pageSize) + 1;
@@ -290,6 +378,10 @@
     private string AutoRefreshStatus => autoRefreshEnabled && pollingIntervalSeconds > 0
         ? $"every {pollingIntervalSeconds}s"
         : "off";
+    private string TickRowClass => isEditMode ? "selection-row" : "editable-row";
+    private string TickRowTitle => isEditMode
+        ? "Select market tick"
+        : "Edit market tick note";
 
     protected override async Task OnInitializedAsync()
     {
@@ -347,6 +439,8 @@
             ticks = response.Data;
             totalCount = response.TotalCount;
             page = response.Page;
+            selectedTickIds.RemoveWhere(
+                ccseq => ticks.All(tick => tick.Ccseq != ccseq));
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -462,9 +556,130 @@
         }
     }
 
-    private void OpenNoteEditor(MarketTickDto tick)
+    private void EnableEditMode()
     {
+        autoRefreshBeforeEditMode = autoRefreshEnabled;
+        autoRefreshEnabled = false;
+        StopAutoRefresh();
+        selectedTickIds.Clear();
+        isEditMode = true;
+    }
+
+    private void CancelEditMode()
+    {
+        isEditMode = false;
+        selectedTickIds.Clear();
+        autoRefreshEnabled = autoRefreshBeforeEditMode && pollingIntervalSeconds > 0;
+
+        if (autoRefreshEnabled)
+        {
+            StartAutoRefresh();
+        }
+    }
+
+    private void HandleTickRowClick(MarketTickDto tick)
+    {
+        if (isEditMode)
+        {
+            SetTickSelected(tick.Ccseq, !selectedTickIds.Contains(tick.Ccseq));
+            return;
+        }
+
         selectedTick = tick;
+    }
+
+    private void ChangeTickSelection(long ccseq, ChangeEventArgs args)
+    {
+        SetTickSelected(ccseq, args.Value is true);
+    }
+
+    private void SetTickSelected(long ccseq, bool isSelected)
+    {
+        if (isSelected)
+        {
+            selectedTickIds.Add(ccseq);
+        }
+        else
+        {
+            selectedTickIds.Remove(ccseq);
+        }
+    }
+
+    private async Task DeleteTickAsync(MarketTickDto tick)
+    {
+        var confirmed = await JsRuntime.InvokeAsync<bool>(
+            "confirm",
+            $"Delete market tick {tick.Ccseq}?");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        errorMessage = null;
+
+        try
+        {
+            await ApiClient.DeleteMarketTickAsync(tick.Ccseq);
+            await ReloadAfterDeleteAsync();
+        }
+        catch (Exception exception) when (exception is HttpRequestException
+                                          or TaskCanceledException
+                                          or InvalidOperationException)
+        {
+            errorMessage = $"Unable to delete market tick: {exception.Message}";
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+
+    private async Task DeleteSelectedAsync()
+    {
+        if (selectedTickIds.Count == 0)
+        {
+            return;
+        }
+
+        var confirmed = await JsRuntime.InvokeAsync<bool>(
+            "confirm",
+            $"Delete {selectedTickIds.Count} selected market ticks?");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        errorMessage = null;
+
+        try
+        {
+            await ApiClient.DeleteMarketTicksAsync(selectedTickIds.ToArray());
+            CancelEditMode();
+            await ReloadAfterDeleteAsync();
+        }
+        catch (Exception exception) when (exception is HttpRequestException
+                                          or TaskCanceledException
+                                          or InvalidOperationException)
+        {
+            errorMessage = $"Unable to delete selected market ticks: {exception.Message}";
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+
+    private async Task ReloadAfterDeleteAsync()
+    {
+        await LoadTicksAsync(showLoading: false, CancellationToken.None);
+
+        if (page > totalPages)
+        {
+            page = totalPages;
+            await LoadTicksAsync(showLoading: false, CancellationToken.None);
+        }
     }
 
     private void CloseNoteEditor()

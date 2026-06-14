@@ -41,4 +41,18 @@ public interface IBitCoinDataService
     /// <param name="note">New note</param>
     /// <returns>True on success, false on failure</returns>
     Task<bool> UpdateNoteForMarketTickAsync(long marketTickId, string? note);
+
+    /// <summary>
+    /// Delete a persisted market tick.
+    /// </summary>
+    /// <param name="marketTickId">Tick id (ccseq)</param>
+    /// <returns>True if the tick was deleted, false if it was not found or deletion failed</returns>
+    Task<bool> DeleteBtcMarketTickAsync(long marketTickId);
+
+    /// <summary>
+    /// Delete multiple persisted market ticks.
+    /// </summary>
+    /// <param name="marketTickIds">Tick ids (ccseqs)</param>
+    /// <returns>The number of deleted ticks</returns>
+    Task<int> DeleteBtcMarketTicksAsync(IReadOnlyCollection<long> marketTickIds);
 }

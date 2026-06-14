@@ -61,6 +61,22 @@ Accept: application/json
   "note": null
 }
 
+### Delete a persisted market tick
+DELETE {{host}}/btcTicks/{{marketTickId}}
+Accept: application/json
+
+### Delete persisted market ticks in a batch
+DELETE {{host}}/btcTicks
+Content-Type: application/json
+Accept: application/json
+
+{
+  "ccseqs": [
+    {{marketTickId}},
+    999999999999
+  ]
+}
+
 ### Validation: page must be greater than zero
 GET {{host}}/btcTicks?page=0&pageSize={{pageSize}}&currencyCodes=CZK
 Accept: application/json

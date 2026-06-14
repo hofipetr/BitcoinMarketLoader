@@ -57,6 +57,31 @@ public class InMemoryMarketRepositoryTests
         Assert.Equal(100m, storedTick.TradeStatistics!.Single().VolumeTotal);
     }
 
+    [Fact]
+    public async Task DeleteMarketTickRemovesOnlyRequestedTick()
+    {
+        var repository = new InMemoryMarketRepository(
+            [CreateMarketTick(10), CreateMarketTick(20)]);
+
+        Assert.True(await repository.DeleteMarketTick(10));
+        Assert.False(await repository.DeleteMarketTick(999));
+        Assert.Null(await repository.GetMarketTick(10));
+        Assert.NotNull(await repository.GetMarketTick(20));
+    }
+
+    [Fact]
+    public async Task DeleteMarketTicksReturnsDeletedCountAndIgnoresDuplicatesAndMissingTicks()
+    {
+        var repository = new InMemoryMarketRepository(
+            [CreateMarketTick(10), CreateMarketTick(20), CreateMarketTick(30)]);
+
+        var deletedCount = await repository.DeleteMarketTicks([10, 10, 30, 999]);
+
+        Assert.Equal(2, deletedCount);
+        Assert.Equal(1, await repository.GetMarketTicksCount());
+        Assert.NotNull(await repository.GetMarketTick(20));
+    }
+
     private static MarketTick CreateMarketTick(long ccseq) =>
         new()
         {

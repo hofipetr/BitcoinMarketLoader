@@ -99,6 +99,32 @@ public class MarketRepository(MainDbContext db) : IMarketRepository
         }
         return false;
     }
+
+    public async Task<bool> DeleteMarketTick(long ccseq)
+    {
+        var deletedCount = await db.MarketTicks
+            .Where(tick => tick.Ccseq == ccseq)
+            .ExecuteDeleteAsync()
+            .ConfigureAwait(false);
+
+        return deletedCount > 0;
+    }
+
+    public async Task<int> DeleteMarketTicks(IReadOnlyCollection<long> ccseqs)
+    {
+        ArgumentNullException.ThrowIfNull(ccseqs);
+
+        if (ccseqs.Count == 0)
+        {
+            return 0;
+        }
+
+        var distinctCcseqs = ccseqs.Distinct().ToArray();
+        return await db.MarketTicks
+            .Where(tick => distinctCcseqs.Contains(tick.Ccseq))
+            .ExecuteDeleteAsync()
+            .ConfigureAwait(false);
+    }
     
     private IQueryable<MarketTick> GetMarketTickQuery(bool includeDetails)
     {

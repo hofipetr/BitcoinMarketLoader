@@ -117,6 +117,53 @@ public class BtcTicksController(IBitCoinDataService bitCoinDataService) : Contro
 
         return updated ? NoContent() : NotFound();
     }
+
+    /// <summary>
+    /// Deletes a persisted BTC market tick by its CoinDesk sequence number.
+    /// </summary>
+    [HttpDelete("{marketTickId:long:min(1)}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteBtcMarketTickAsync(long marketTickId)
+    {
+        var deleted = await bitCoinDataService
+            .DeleteBtcMarketTickAsync(marketTickId)
+            .ConfigureAwait(false);
+
+        return deleted ? NoContent() : NotFound();
+    }
+
+    /// <summary>
+    /// Deletes persisted BTC market ticks by their CoinDesk sequence numbers.
+    /// </summary>
+    [HttpDelete]
+    [ProducesResponseType<DeleteMarketTicksResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<DeleteMarketTicksResponse>> DeleteBtcMarketTicksAsync(
+        [FromBody] DeleteMarketTicksRequest request)
+    {
+        if (request.Ccseqs is null || request.Ccseqs.Count == 0)
+        {
+            ModelState.AddModelError(nameof(request.Ccseqs), "At least one CCSEQ is required.");
+        }
+        else if (request.Ccseqs.Any(ccseq => ccseq <= 0))
+        {
+            ModelState.AddModelError(nameof(request.Ccseqs), "All CCSEQ values must be greater than zero.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var deletedCount = await bitCoinDataService
+            .DeleteBtcMarketTicksAsync(request.Ccseqs!)
+            .ConfigureAwait(false);
+
+        return Ok(new DeleteMarketTicksResponse(deletedCount));
+    }
 }
 
 public sealed record UpdateMarketTickNoteRequest(string? Note);
+public sealed record DeleteMarketTicksRequest(IReadOnlyCollection<long>? Ccseqs);
+public sealed record DeleteMarketTicksResponse(int DeletedCount);

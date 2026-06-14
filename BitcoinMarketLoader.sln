@@ -5,6 +5,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3A86C0C8-E140-41CD-924E-C6E1B2A35343}"
 	ProjectSection(SolutionItems) = preProject
 		compose.yaml = compose.yaml
+		compose.mock.yaml = compose.mock.yaml
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinMarketLoader.Domain", "BitcoinMarketLoader.Domain\BitcoinMarketLoader.Domain.csproj", "{384E43F5-4745-4FA7-8B64-C905EB58717F}"

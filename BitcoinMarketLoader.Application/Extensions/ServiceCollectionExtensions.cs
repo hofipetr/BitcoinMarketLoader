@@ -15,8 +15,11 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IBitCoinDataService, BitCoinDataService>();
             services.AddScoped<ICzkExchangeRateService, CzkExchangeRateService>();
             services.AddScoped<IModelCurrencyConversionService, ModelCurrencyConversionService>();
+            services.AddSingleton<IMarketTickPollingService, MarketTickPollingService>();
 
             services.Configure<ExchangeRateConfig>(config.GetSection(ExchangeRateConfig.SectionName));
+            services.Configure<MarketTickPollingOptions>(
+                config.GetSection(MarketTickPollingOptions.SectionName));
             
             return services;
         }

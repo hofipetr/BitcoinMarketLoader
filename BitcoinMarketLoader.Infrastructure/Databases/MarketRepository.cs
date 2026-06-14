@@ -20,7 +20,7 @@ public class MarketRepository(MainDbContext db) : IMarketRepository
     {
         var query = GetMarketTickQuery(includeDetails);
         var ticks = await query
-            .OrderBy(t => t.Ccseq)
+            .OrderByDescending(t => t.Ccseq)
             .Skip(skip)
             .Take(take)
             .ToListAsync()

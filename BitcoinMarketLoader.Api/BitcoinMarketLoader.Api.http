@@ -3,6 +3,10 @@
 @page = 1
 @pageSize = 10
 
+### Get the market tick polling interval in seconds
+GET {{host}}/polling/interval
+Accept: application/json
+
 ### Get persisted BTC market ticks in CZK
 GET {{host}}/btcTicks?page={{page}}&pageSize={{pageSize}}&currencyCodes=CZK
 Accept: application/json

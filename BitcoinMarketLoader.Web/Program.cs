@@ -1,10 +1,17 @@
 using BitcoinMarketLoader.Components;
+using BitcoinMarketLoader.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddHttpClient<BitcoinMarketApiClient>(httpClient =>
+{
+    var baseUrl = builder.Configuration["BitcoinMarketApi:BaseUrl"]
+        ?? throw new InvalidOperationException("BitcoinMarketApi:BaseUrl is not configured.");
+    httpClient.BaseAddress = new Uri(baseUrl, UriKind.Absolute);
+});
 
 var app = builder.Build();
 

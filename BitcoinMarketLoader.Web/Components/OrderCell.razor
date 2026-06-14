@@ -1,0 +1,26 @@
+@using BitcoinMarketLoader.Models
+
+@if (Order is null)
+{
+    <span>—</span>
+}
+else
+{
+    <div class="object-cell">
+        <strong>@Number(Order.Price)</strong>
+        <span>Quantity: @Number(Order.Quantity)</span>
+        <span>Quote quantity: @Number(Order.QuoteQuantity)</span>
+        <span>Updated: @Timestamp(Order.LastUpdateTimestamp)</span>
+        <span>Position: @Timestamp(Order.PositionUpdateTimestamp)</span>
+    </div>
+}
+
+@code {
+    [Parameter] public OrderDto? Order { get; set; }
+
+    private static string Number(decimal? value) =>
+        value?.ToString("#,##0.########") ?? "—";
+
+    private static string Timestamp(MarketTimestampDto? value) =>
+        value is null ? "—" : value.Date.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+}

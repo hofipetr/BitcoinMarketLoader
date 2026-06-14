@@ -1,7 +1,553 @@
-﻿@page "/"
+@page "/"
+@rendermode InteractiveServer
+@implements IAsyncDisposable
+@using BitcoinMarketLoader.Models
+@using BitcoinMarketLoader.Services
+@inject BitcoinMarketApiClient ApiClient
 
-<PageTitle>Home</PageTitle>
+<PageTitle>BTC market ticks</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="market-page">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">Bitcoin market loader</p>
+            <h1>Market ticks</h1>
+            <p class="text-secondary mb-0">Persisted CoinDesk BTC market data from the REST API.</p>
+        </div>
 
-Welcome to your new app.
+        <div class="controls">
+            <button type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    disabled="@isLoading"
+                    @onclick="LoadTicksAsync">
+                Refresh
+            </button>
+
+            <label class="auto-refresh-control">
+                <span>Auto-refresh</span>
+                <input class="form-check-input"
+                       type="checkbox"
+                       role="switch"
+                       checked="@autoRefreshEnabled"
+                       disabled="@(pollingIntervalSeconds <= 0)"
+                       @onchange="ChangeAutoRefreshAsync"/>
+            </label>
+
+            <label class="page-size-control">
+                <span>Rows</span>
+                <select class="form-select form-select-sm"
+                        value="@pageSize"
+                        @onchange="ChangePageSizeAsync"
+                        disabled="@isLoading">
+                    @foreach (var size in PageSizes)
+                    {
+                        <option value="@size">@size</option>
+                    }
+                </select>
+            </label>
+
+            <div class="currency-control"
+                 role="group"
+                 aria-label="Display currency">
+                <button type="button"
+                        class="@CurrencySegmentClass("CZK")"
+                        aria-pressed="@(currency == "CZK")"
+                        disabled="@isLoading"
+                        @onclick='() => ChangeCurrencyAsync("CZK")'>
+                    CZK
+                </button>
+                <button type="button"
+                        class="@CurrencySegmentClass("EUR")"
+                        aria-pressed="@(currency == "EUR")"
+                        disabled="@isLoading"
+                        @onclick='() => ChangeCurrencyAsync("EUR")'>
+                    EUR
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="summary-bar">
+        <span><strong>@totalCount</strong> ticks</span>
+        <span>Page <strong>@(page)</strong> of <strong>@totalPages</strong></span>
+        <span>Prices in <strong>@currency</strong></span>
+        <span>Auto-refresh <strong>@AutoRefreshStatus</strong></span>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Market tick views">
+        <button class="@TabClass(DetailsTab)"
+                type="button"
+                @onclick="() => activeTab = DetailsTab">
+            Tick details
+        </button>
+        @foreach (var range in StatisticRanges)
+        {
+            <button class="@TabClass(range.Name)"
+                    type="button"
+                    @onclick="() => activeTab = range.Name">
+                @range.Label
+            </button>
+        }
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="state-panel">
+            <div class="spinner-border spinner-border-sm" role="status"></div>
+            <span>Loading market ticks...</span>
+        </div>
+    }
+    else if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="alert alert-danger d-flex justify-content-between align-items-center" role="alert">
+            <span>@errorMessage</span>
+            <button class="btn btn-sm btn-outline-danger" @onclick="LoadTicksAsync">Retry</button>
+        </div>
+    }
+    else if (ticks.Count == 0)
+    {
+        <div class="state-panel">No market ticks were returned for this page.</div>
+    }
+    else if (activeTab == DetailsTab)
+    {
+        <div class="grid-shell">
+            <table class="market-grid details-grid">
+                <thead>
+                <tr>
+                    <th>CCSEQ</th>
+                    <th>Generated</th>
+                    <th>Market</th>
+                    <th>Instrument</th>
+                    <th>Base</th>
+                    <th>Quote</th>
+                    <th>Price</th>
+                    <th>Price flag</th>
+                    <th>Price updated</th>
+                    <th>Last trade</th>
+                    <th>Last processed trade</th>
+                    <th>Best bid</th>
+                    <th>Best ask</th>
+                    <th>Note</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var tick in ticks)
+                {
+                    <tr class="editable-row"
+                        title="Edit market tick note"
+                        @onclick="() => OpenNoteEditor(tick)">
+                        <td class="identifier">@tick.Ccseq</td>
+                        <td>@FormatDate(tick.GeneratedTimestamp)</td>
+                        <td>@Value(tick.Market)</td>
+                        <td>@Value(tick.Instrument)</td>
+                        <td>@FormatCurrency(tick.BaseCurrency)</td>
+                        <td>@FormatCurrency(tick.QuoteCurrency)</td>
+                        <td class="number price">@FormatDecimal(tick.Price)</td>
+                        <td>@Value(tick.PriceFlag)</td>
+                        <td>@FormatTimestamp(tick.PriceUpdateTimestamp)</td>
+                        <td><TradeDetailsCell Trade="tick.LastTrade"/></td>
+                        <td><TradeDetailsCell Trade="tick.LastProcessedTrade"/></td>
+                        <td><OrderCell Order="tick.BestBid"/></td>
+                        <td><OrderCell Order="tick.BestAsk"/></td>
+                        <td class="note-cell">@Value(tick.Note)</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        var range = StatisticRanges.Single(item => item.Name == activeTab);
+        <div class="grid-shell">
+            <table class="market-grid statistics-grid">
+                <thead>
+                <tr>
+                    <th>CCSEQ</th>
+                    <th>Open</th>
+                    <th>High</th>
+                    <th>High time</th>
+                    <th>Low</th>
+                    <th>Low time</th>
+                    <th>Change</th>
+                    <th>Change %</th>
+                    <th>Volume total</th>
+                    <th>Volume buy</th>
+                    <th>Volume sell</th>
+                    <th>Volume unknown</th>
+                    <th>Quote total</th>
+                    <th>Quote buy</th>
+                    <th>Quote sell</th>
+                    <th>Quote unknown</th>
+                    <th>First trade</th>
+                    <th>Trades</th>
+                    <th>Buys</th>
+                    <th>Sells</th>
+                    <th>Unknown</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var tick in ticks)
+                {
+                    var statistics = GetStatistics(tick, range);
+                    <tr class="editable-row"
+                        title="Edit market tick note"
+                        @onclick="() => OpenNoteEditor(tick)">
+                        <td class="identifier">@tick.Ccseq</td>
+                        @if (statistics is null)
+                        {
+                            <td colspan="20" class="missing-statistics">No @range.Label statistics available.</td>
+                        }
+                        else
+                        {
+                            <td class="number">@FormatDecimal(statistics.OpenPrice)</td>
+                            <td class="number">@FormatDecimal(statistics.HighPrice)</td>
+                            <td>@FormatTimestamp(statistics.HighPriceTimestamp)</td>
+                            <td class="number">@FormatDecimal(statistics.LowPrice)</td>
+                            <td>@FormatTimestamp(statistics.LowPriceTimestamp)</td>
+                            <td class="number">@FormatDecimal(statistics.PriceChange)</td>
+                            <td class="number">@FormatDecimal(statistics.PriceChangePercent)</td>
+                            <td class="number">@FormatDecimal(statistics.VolumeTotal)</td>
+                            <td class="number">@FormatDecimal(statistics.VolumeBuy)</td>
+                            <td class="number">@FormatDecimal(statistics.VolumeSell)</td>
+                            <td class="number">@FormatDecimal(statistics.VolumeUnknown)</td>
+                            <td class="number">@FormatDecimal(statistics.QuoteVolumeTotal)</td>
+                            <td class="number">@FormatDecimal(statistics.QuoteVolumeBuy)</td>
+                            <td class="number">@FormatDecimal(statistics.QuoteVolumeSell)</td>
+                            <td class="number">@FormatDecimal(statistics.QuoteVolumeUnknown)</td>
+                            <td>@FormatTimestamp(statistics.FirstTradeTimestamp)</td>
+                            <td class="number">@FormatLong(statistics.TotalTrades)</td>
+                            <td class="number">@FormatLong(statistics.TotalBuys)</td>
+                            <td class="number">@FormatLong(statistics.TotalSells)</td>
+                            <td class="number">@FormatLong(statistics.TotalUnknownTrades)</td>
+                        }
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <div class="pagination-bar">
+        <button class="btn btn-outline-secondary btn-sm"
+                disabled="@(isLoading || page <= 1)"
+                @onclick="PreviousPageAsync">
+            Previous
+        </button>
+        <span>Showing @FirstItem-@LastItem of @totalCount</span>
+        <button class="btn btn-outline-secondary btn-sm"
+                disabled="@(isLoading || page >= totalPages)"
+                @onclick="NextPageAsync">
+            Next
+        </button>
+    </div>
+</div>
+
+@if (selectedTick is not null)
+{
+    <MarketTickNoteEditor Tick="selectedTick"
+                          OnClosed="CloseNoteEditor"
+                          OnSaved="HandleNoteSaved"/>
+}
+
+@code {
+    private const string DetailsTab = "details";
+    private static readonly int[] PageSizes = [10, 25, 50, 100];
+    private static readonly RangeTab[] StatisticRanges =
+    [
+        new("CurrentHour", "Current hour", 0),
+        new("CurrentDay", "Current day", 1),
+        new("CurrentWeek", "Current week", 2),
+        new("CurrentMonth", "Current month", 3),
+        new("CurrentYear", "Current year", 4),
+        new("Last24Hours", "Last 24 hours", 5),
+        new("Last7Days", "Last 7 days", 6),
+        new("Last30Days", "Last 30 days", 7),
+        new("Last90Days", "Last 90 days", 8),
+        new("Last180Days", "Last 180 days", 9),
+        new("Last365Days", "Last 365 days", 10),
+        new("LifeTime", "Lifetime", 11),
+    ];
+
+    private IReadOnlyCollection<MarketTickDto> ticks = [];
+    private string activeTab = DetailsTab;
+    private string currency = "CZK";
+    private string? errorMessage;
+    private int page = 1;
+    private int pageSize = 10;
+    private int totalCount;
+    private bool isLoading;
+    private bool autoRefreshEnabled = true;
+    private int pollingIntervalSeconds;
+    private CancellationTokenSource? autoRefreshCancellation;
+    private Task? autoRefreshTask;
+    private readonly SemaphoreSlim loadLock = new(1, 1);
+    private MarketTickDto? selectedTick;
+
+    private int totalPages => Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
+    private int FirstItem => totalCount == 0 ? 0 : ((page - 1) * pageSize) + 1;
+    private int LastItem => Math.Min(page * pageSize, totalCount);
+    private string AutoRefreshStatus => autoRefreshEnabled && pollingIntervalSeconds > 0
+        ? $"every {pollingIntervalSeconds}s"
+        : "off";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTicksAsync();
+
+        try
+        {
+            pollingIntervalSeconds = Math.Max(0, await ApiClient.GetPollingIntervalAsync());
+            autoRefreshEnabled = pollingIntervalSeconds > 0;
+
+            if (autoRefreshEnabled)
+            {
+                StartAutoRefresh();
+            }
+        }
+        catch (Exception exception) when (exception is HttpRequestException
+                                          or TaskCanceledException
+                                          or InvalidOperationException)
+        {
+            pollingIntervalSeconds = 0;
+            autoRefreshEnabled = false;
+        }
+    }
+
+    private Task LoadTicksAsync() =>
+        LoadTicksAsync(showLoading: true, CancellationToken.None);
+
+    private async Task LoadTicksAsync(
+        bool showLoading,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await loadLock.WaitAsync(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return;
+        }
+
+        try
+        {
+            if (showLoading)
+            {
+                isLoading = true;
+            }
+
+            errorMessage = null;
+
+            var response = await ApiClient.GetMarketTicksAsync(
+                page,
+                pageSize,
+                currency,
+                cancellationToken);
+            ticks = response.Data;
+            totalCount = response.TotalCount;
+            page = response.Page;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
+        catch (Exception exception) when (exception is HttpRequestException
+                                          or TaskCanceledException
+                                          or InvalidOperationException)
+        {
+            ticks = [];
+            totalCount = 0;
+            errorMessage = $"Unable to load market ticks: {exception.Message}";
+        }
+        finally
+        {
+            if (showLoading)
+            {
+                isLoading = false;
+            }
+
+            loadLock.Release();
+        }
+    }
+
+    private Task ChangeAutoRefreshAsync(ChangeEventArgs args)
+    {
+        autoRefreshEnabled = args.Value is true;
+
+        if (autoRefreshEnabled && pollingIntervalSeconds > 0)
+        {
+            StartAutoRefresh();
+        }
+        else
+        {
+            StopAutoRefresh();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private void StartAutoRefresh()
+    {
+        StopAutoRefresh();
+        autoRefreshCancellation = new CancellationTokenSource();
+        autoRefreshTask = RunAutoRefreshAsync(autoRefreshCancellation.Token);
+    }
+
+    private void StopAutoRefresh()
+    {
+        autoRefreshCancellation?.Cancel();
+        autoRefreshCancellation?.Dispose();
+        autoRefreshCancellation = null;
+        autoRefreshTask = null;
+    }
+
+    private async Task RunAutoRefreshAsync(CancellationToken cancellationToken)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(pollingIntervalSeconds));
+
+        try
+        {
+            while (await timer.WaitForNextTickAsync(cancellationToken))
+            {
+                await InvokeAsync(async () =>
+                {
+                    await LoadTicksAsync(showLoading: false, cancellationToken);
+                    StateHasChanged();
+                });
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+        }
+    }
+
+    private async Task ChangePageSizeAsync(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), out var selectedSize)
+            && PageSizes.Contains(selectedSize))
+        {
+            pageSize = selectedSize;
+            page = 1;
+            await LoadTicksAsync();
+        }
+    }
+
+    private async Task ChangeCurrencyAsync(string selectedCurrency)
+    {
+        if (selectedCurrency == currency)
+        {
+            return;
+        }
+
+        currency = selectedCurrency;
+        page = 1;
+        await LoadTicksAsync();
+    }
+
+    private async Task PreviousPageAsync()
+    {
+        if (page > 1)
+        {
+            page--;
+            await LoadTicksAsync();
+        }
+    }
+
+    private async Task NextPageAsync()
+    {
+        if (page < totalPages)
+        {
+            page++;
+            await LoadTicksAsync();
+        }
+    }
+
+    private void OpenNoteEditor(MarketTickDto tick)
+    {
+        selectedTick = tick;
+    }
+
+    private void CloseNoteEditor()
+    {
+        selectedTick = null;
+    }
+
+    private void HandleNoteSaved(string? note)
+    {
+        if (selectedTick is null)
+        {
+            return;
+        }
+
+        var displayedTick = ticks.FirstOrDefault(tick => tick.Ccseq == selectedTick.Ccseq);
+        if (displayedTick is not null)
+        {
+            displayedTick.Note = note;
+        }
+
+        CloseNoteEditor();
+    }
+
+    private static TradeStatisticsDto? GetStatistics(MarketTickDto tick, RangeTab range)
+    {
+        if (tick.TradeStatisticsByRange is null)
+        {
+            return null;
+        }
+
+        if (tick.TradeStatisticsByRange.TryGetValue(range.Name, out var namedStatistics)
+            || tick.TradeStatisticsByRange.TryGetValue(range.NumericKey.ToString(), out namedStatistics))
+        {
+            return namedStatistics;
+        }
+
+        return tick.TradeStatisticsByRange
+            .FirstOrDefault(item => item.Key.Equals(range.Name, StringComparison.OrdinalIgnoreCase))
+            .Value;
+    }
+
+    private string TabClass(string tab) =>
+        tab == activeTab ? "tab-button active" : "tab-button";
+
+    private string CurrencySegmentClass(string value) =>
+        value == currency ? "currency-segment active" : "currency-segment";
+
+    private static string Value(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "—" : value;
+
+    private static string FormatCurrency(MarketCurrencyDto? value) =>
+        value is null ? "—" : $"{Value(value.Name)} ({value.Id})";
+
+    private static string FormatDecimal(decimal? value) =>
+        value?.ToString("#,##0.###") ?? "—";
+
+    private static string FormatLong(long? value) =>
+        value?.ToString("N0") ?? "—";
+
+    private static string FormatDate(DateTime value) =>
+        value.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+
+    private static string FormatTimestamp(MarketTimestampDto? value) =>
+        value is null ? "—" : FormatDate(value.Date);
+
+    public async ValueTask DisposeAsync()
+    {
+        var task = autoRefreshTask;
+        StopAutoRefresh();
+
+        if (task is not null)
+        {
+            try
+            {
+                await task;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
+
+        loadLock.Dispose();
+    }
+
+    private sealed record RangeTab(string Name, string Label, int NumericKey);
+}

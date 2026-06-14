@@ -1,3 +1,4 @@
+using BitcoinMarketLoader.Domain.Enums;
 using BitcoinMarketLoader.Domain.Extensions;
 using BitcoinMarketLoader.Domain.Market;
 using Microsoft.Extensions.Logging;
@@ -66,7 +67,11 @@ public class ModelCurrencyConversionService(
     private async Task ConvertEurToCzk(TradeStatistics? model, DateTime tickDefaultTimestamp, decimal? currentPrice)
     {
         if (model is null) return;
-        var rangeStart = model.Range.RangeStart(tickDefaultTimestamp);
+        var rangeStart = model.Range switch
+        {
+            TimeWindowRanges.LifeTime => model.FirstTradeTimestamp?.Date ?? tickDefaultTimestamp,
+            _ => model.Range.RangeStart(tickDefaultTimestamp)
+        };
 
         model.OpenPrice = await ConvertValue(model.OpenPrice, null, rangeStart).ConfigureAwait(false);
         model.HighPrice = await ConvertValue(model.HighPrice, model.HighPriceTimestamp, tickDefaultTimestamp)
@@ -84,7 +89,7 @@ public class ModelCurrencyConversionService(
         {
             // recalculate change - it may be different from the EUR change due to additional changes in exchange rate
             model.PriceChange = currentPrice - model.OpenPrice;
-            model.PriceChangePercent = (currentPrice / model.OpenPrice) * 100m;
+            model.PriceChangePercent = (model.PriceChange / model.OpenPrice) * 100m;
         }
         else
         {

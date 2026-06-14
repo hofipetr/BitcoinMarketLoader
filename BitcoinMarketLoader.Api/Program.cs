@@ -1,8 +1,17 @@
 using BitcoinMarketLoader.Application.Extensions;
+using BitcoinMarketLoader.Api.BackgroundServices;
 using BitcoinMarketLoader.Infrastructure.Extensions;
 using Microsoft.OpenApi;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var nlogConfigFile = builder.Environment.IsDevelopment()
+    ? "NLog.Development.config"
+    : "NLog.config";
+
+builder.Logging.ClearProviders();
+builder.Logging.AddNLogWeb(nlogConfigFile);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -21,6 +30,7 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddHostedService<MarketTickPollingBackgroundService>();
 
 var app = builder.Build();
 

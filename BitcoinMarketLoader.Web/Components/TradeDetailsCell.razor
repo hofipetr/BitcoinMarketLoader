@@ -1,0 +1,39 @@
+@using BitcoinMarketLoader.Models
+
+@if (Trade is null)
+{
+    <span>—</span>
+}
+else
+{
+    <div class="object-cell">
+        <strong>@Trade.Ccseq</strong>
+        <span>ID: @Value(Trade.TradeId)</span>
+        <span>Price: @Number(Trade.Price)</span>
+        <span>Quantity: @Number(Trade.Quantity)</span>
+        <span>Quote quantity: @Number(Trade.QuoteQuantity)</span>
+        <span>Side: @SideName(Trade.Side)</span>
+        <span>Time: @Timestamp(Trade.Timestamp)</span>
+        <span>Received: @Timestamp(Trade.ReceivedTimestamp)</span>
+    </div>
+}
+
+@code {
+    [Parameter] public TradeDetailsDto? Trade { get; set; }
+
+    private static string Value(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? "—" : value;
+
+    private static string Number(decimal? value) =>
+        value?.ToString("#,##0.########") ?? "—";
+
+    private static string SideName(int? value) => value switch
+    {
+        0 => "Buy",
+        1 => "Sell",
+        _ => "—",
+    };
+
+    private static string Timestamp(MarketTimestampDto? value) =>
+        value is null ? "—" : value.Date.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+}

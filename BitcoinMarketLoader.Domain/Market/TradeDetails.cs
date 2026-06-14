@@ -1,6 +1,24 @@
-namespace BitcoinMarketLoader.Domain;
+using System.ComponentModel.DataAnnotations;
+using BitcoinMarketLoader.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 
-public class TradeDetail
+namespace BitcoinMarketLoader.Domain.Market;
+
+public class TradeDetails
 {
-    public int Id { get; set; }
+    [Key]
+    public required long Ccseq { get; set; }
+
+    public string? TradeId { get; set; }
+    
+    [Precision(18,8)]
+    public Decimal? Quantity { get; set; }
+    [Precision(18,8)]
+    public Decimal? QuoteQuantity { get; set; }
+    [Precision(18,8)]
+    public Decimal? Price { get; set; }
+    public MarketTimestamp? Timestamp { get; set; }
+    public MarketTimestamp? ReceivedTimestamp { get; set; }
+    public TradeSides? Side { get; set; }
+    
 }

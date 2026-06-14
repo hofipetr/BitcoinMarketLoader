@@ -1,6 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinMarketLoader", "BitcoinMarketLoader\BitcoinMarketLoader.csproj", "{26214961-D5CB-4E56-991E-CF8249428F87}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinMarketLoader.Web", "BitcoinMarketLoader.Web\BitcoinMarketLoader.Web.csproj", "{26214961-D5CB-4E56-991E-CF8249428F87}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3A86C0C8-E140-41CD-924E-C6E1B2A35343}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinMarketLoader.Domain", "BitcoinMarketLoader.Domain\BitcoinMarketLoader.Domain.csproj", "{384E43F5-4745-4FA7-8B64-C905EB58717F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinMarketLoader.Infrastructure", "BitcoinMarketLoader.Infrastructure\BitcoinMarketLoader.Infrastructure.csproj", "{D6880080-553F-40B5-97D4-F8E4128B46A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinMarketLoader.Api", "BitcoinMarketLoader.Api\BitcoinMarketLoader.Api.csproj", "{E9473674-E372-483C-8545-99C47CE6248E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinMarketLoader.Application", "BitcoinMarketLoader.Application\BitcoinMarketLoader.Application.csproj", "{3B165A48-B030-4ECD-AEE7-ECCADAA9CC5D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinMarketLoader.UnitTests", "BitcoinMarketLoader.UnitTests\BitcoinMarketLoader.UnitTests.csproj", "{DBD576A1-B0D9-48A7-A777-8B3521C4E8B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +27,25 @@ Global
 		{26214961-D5CB-4E56-991E-CF8249428F87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26214961-D5CB-4E56-991E-CF8249428F87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26214961-D5CB-4E56-991E-CF8249428F87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{384E43F5-4745-4FA7-8B64-C905EB58717F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{384E43F5-4745-4FA7-8B64-C905EB58717F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{384E43F5-4745-4FA7-8B64-C905EB58717F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{384E43F5-4745-4FA7-8B64-C905EB58717F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6880080-553F-40B5-97D4-F8E4128B46A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6880080-553F-40B5-97D4-F8E4128B46A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6880080-553F-40B5-97D4-F8E4128B46A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6880080-553F-40B5-97D4-F8E4128B46A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9473674-E372-483C-8545-99C47CE6248E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9473674-E372-483C-8545-99C47CE6248E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9473674-E372-483C-8545-99C47CE6248E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9473674-E372-483C-8545-99C47CE6248E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B165A48-B030-4ECD-AEE7-ECCADAA9CC5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B165A48-B030-4ECD-AEE7-ECCADAA9CC5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B165A48-B030-4ECD-AEE7-ECCADAA9CC5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B165A48-B030-4ECD-AEE7-ECCADAA9CC5D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBD576A1-B0D9-48A7-A777-8B3521C4E8B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBD576A1-B0D9-48A7-A777-8B3521C4E8B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBD576A1-B0D9-48A7-A777-8B3521C4E8B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBD576A1-B0D9-48A7-A777-8B3521C4E8B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

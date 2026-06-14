@@ -1,6 +1,6 @@
 namespace BitcoinMarketLoader.Domain.Enums;
 
-public enum TradeSide
+public enum TradeSides
 {
     Buy = 0,
     Sell = 1,

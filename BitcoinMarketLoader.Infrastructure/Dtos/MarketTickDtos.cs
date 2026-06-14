@@ -1,6 +1,9 @@
 using System.Text.Json.Serialization;
 
-namespace BitcoinMarketLoader.Application.Dtos.MarketTickDtos;
+// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable once CheckNamespace
+
+namespace BitcoinMarketLoader.Infrastructure.Dtos.MarketTickDtos;
 
 public class MarketTickDto
 {
@@ -149,6 +152,7 @@ public class InstrumentDataDto
     [JsonPropertyName("BEST_ASK_POSITION_IN_BOOK_UPDATE_TS_NS")]
     public long? BestAskPositionInBookUpdateTsNs { get; set; }
 
+    /*
     // Current hour stats
     [JsonPropertyName("CURRENT_HOUR_VOLUME")]
     public decimal? CurrentHourVolume { get; set; }
@@ -812,6 +816,10 @@ public class InstrumentDataDto
 
     [JsonPropertyName("LIFETIME_CHANGE_PERCENTAGE")]
     public decimal? LifetimeChangePercentage { get; set; }
+*/
+    
+    [JsonExtensionData]
+    public IDictionary<string, object>? ExtensionData { get; set; }
 }
 
 public class ErrorDto

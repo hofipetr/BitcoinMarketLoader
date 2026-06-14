@@ -1,0 +1,79 @@
+@host = http://localhost:5131
+@marketTickId = 107705969
+@page = 1
+@pageSize = 10
+
+### Get persisted BTC market ticks in CZK
+GET {{host}}/btcTicks?page={{page}}&pageSize={{pageSize}}&currencyCodes=CZK
+Accept: application/json
+
+### Get persisted BTC market ticks in EUR
+GET {{host}}/btcTicks?page={{page}}&pageSize={{pageSize}}&currencyCodes=EUR
+Accept: application/json
+
+### Get a persisted BTC market tick in CZK
+GET {{host}}/btcTicks/{{marketTickId}}?currencyCodes=CZK
+Accept: application/json
+
+### Get a persisted BTC market tick in EUR
+GET {{host}}/btcTicks/{{marketTickId}}?currencyCodes=EUR
+Accept: application/json
+
+### Fetch, persist, and return the latest BTC market tick in CZK
+GET {{host}}/btcTicks/latest?currencyCodes=CZK
+Accept: application/json
+
+### Fetch, persist, and return the latest BTC market tick in EUR
+GET {{host}}/btcTicks/latest?currencyCodes=EUR
+Accept: application/json
+
+### Get the current EUR exchange rate in CZK
+GET {{host}}/exchangeRates/EUR
+Accept: application/json
+
+### Get the current PHP exchange rate in CZK - test currency with exchange rate for target currency amount > 1
+GET {{host}}/exchangeRates/PHP
+Accept: application/json
+
+### Get the EUR exchange rate in CZK for a specific date
+GET {{host}}/exchangeRates/EUR?date=2026-06-05
+Accept: application/json
+
+### Update a persisted market tick note
+POST {{host}}/btcTicks/{{marketTickId}}/note
+Content-Type: application/json
+Accept: application/json
+
+{
+  "note": "Checked through the API request file."
+}
+
+### Clear a persisted market tick note
+POST {{host}}/btcTicks/{{marketTickId}}/note
+Content-Type: application/json
+Accept: application/json
+
+{
+  "note": null
+}
+
+### Validation: page must be greater than zero
+GET {{host}}/btcTicks?page=0&pageSize={{pageSize}}&currencyCodes=CZK
+Accept: application/json
+
+### Validation: currency must be EUR or CZK
+GET {{host}}/btcTicks?currencyCodes=USD
+Accept: application/json
+
+### Not found: unknown market tick
+GET {{host}}/btcTicks/999999999999?currencyCodes=EUR
+Accept: application/json
+
+### Not found: update an unknown market tick
+POST {{host}}/btcTicks/999999999999/note
+Content-Type: application/json
+Accept: application/json
+
+{
+  "note": "This tick should not exist."
+}

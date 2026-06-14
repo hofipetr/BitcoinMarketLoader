@@ -1,6 +1,6 @@
 namespace BitcoinMarketLoader.Domain.Enums;
 
-public enum OrderType
+public enum OrderTypes
 {
     Bid,
     Ask,

@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <RootNamespace>BitcoinMarketLoader</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

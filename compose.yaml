@@ -1,0 +1,13 @@
+﻿services:
+  bitcoinmarketloader:
+    image: bitcoinmarketloader
+    build:
+      context: .
+      dockerfile: BitcoinMarketLoader/Dockerfile
+
+  bitcoinmarketloader.api:
+    image: bitcoinmarketloader.api
+    build:
+      context: .
+      dockerfile: BitcoinMarketLoader.Api/Dockerfile
+

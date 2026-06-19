@@ -1,3 +1,5 @@
+@use "Styles/colors" as colors;
+
 .page {
     position: relative;
     display: flex;
@@ -9,13 +11,13 @@ main {
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, #251b0b 0%, #5d3b08 70%);
+    background-image: linear-gradient(180deg, colors.$sidebar-start 0%, colors.$sidebar-end 70%);
 }
 
 .top-row {
-    background-color: #fffdf8;
-    border-bottom: 1px solid #ded8cd;
-    color: #6f6a61;
+    background-color: colors.$cream-50;
+    border-bottom: 1px solid colors.$stone-200;
+    color: colors.$stone-725;
     justify-content: flex-end;
     height: 3.5rem;
     display: flex;
@@ -79,9 +81,9 @@ main {
 
 #blazor-error-ui {
     color-scheme: light only;
-    background: lightyellow;
+    background: colors.$warning-surface;
     bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 -1px 2px colors.$black-20;
     box-sizing: border-box;
     display: none;
     left: 0;

@@ -124,7 +124,7 @@
   padding-bottom: 1rem;
   border: 1px solid #ded8cd;
   border-radius: 0.75rem;
-  background: white;
+  background: #fff;
   box-shadow: 0 0.4rem 1.5rem rgba(58, 43, 16, 0.06);
 }
 
@@ -186,7 +186,7 @@
 
 .row-action-cell {
   z-index: 2;
-  background: white;
+  background: #fff;
 }
 
 .row-action-cell .form-check-input {
@@ -223,7 +223,7 @@
   position: sticky;
   left: 6.5rem;
   z-index: 1;
-  background: white;
+  background: #fff;
   color: #795000;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-weight: 700;

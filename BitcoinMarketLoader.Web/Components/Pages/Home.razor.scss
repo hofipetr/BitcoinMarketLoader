@@ -1,10 +1,12 @@
+@use "Styles/colors" as colors;
+
 .auto-refresh-control,
 .page-size-control,
 .currency-control {
     display: flex;
     align-items: center;
     gap: 0.65rem;
-    color: #5f5a50;
+    color: colors.$stone-750;
     font-size: 0.875rem;
     font-weight: 600;
 }
@@ -16,19 +18,19 @@
 .auto-refresh-control .form-check-input {
     margin: 0;
     cursor: pointer;
-    border-color: #5f584d;
-    background-color: #f2eee6;
-    box-shadow: 0 0 0 1px rgba(44, 38, 29, 0.12);
+    border-color: colors.$stone-775;
+    background-color: colors.$cream-150;
+    box-shadow: 0 0 0 1px colors.$control-shadow;
 }
 
 .auto-refresh-control .form-check-input:checked {
-    border-color: #8a5700;
-    background-color: #8a5700;
+    border-color: colors.$amber-600;
+    background-color: colors.$amber-600;
 }
 
 .auto-refresh-control .form-check-input:focus {
-    border-color: #8a5700;
-    box-shadow: 0 0 0 0.2rem rgba(197, 123, 0, 0.25);
+    border-color: colors.$amber-600;
+    box-shadow: 0 0 0 0.2rem colors.$focus-shadow;
 }
 
 .auto-refresh-control .form-check-input:disabled {
@@ -42,9 +44,9 @@
 .currency-control {
     gap: 0.2rem;
     padding: 0.2rem;
-    border: 1px solid #d6cdbf;
+    border: 1px solid colors.$stone-250;
     border-radius: 0.55rem;
-    background: #eee8dc;
+    background: colors.$cream-200;
 }
 
 .currency-segment {
@@ -53,7 +55,7 @@
     border: 0;
     border-radius: 0.38rem;
     background: transparent;
-    color: #756f65;
+    color: colors.$stone-625;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.06em;
@@ -61,17 +63,17 @@
 }
 
 .currency-segment:hover:not(:disabled) {
-    color: #302b24;
+    color: colors.$stone-900;
 }
 
 .currency-segment.active {
-    background: #fffdf8;
-    color: #8a5700;
-    box-shadow: 0 1px 4px rgba(55, 39, 12, 0.18);
+    background: colors.$cream-50;
+    color: colors.$amber-600;
+    box-shadow: 0 1px 4px colors.$segment-shadow;
 }
 
 .currency-segment:focus-visible {
-    outline: 2px solid #c57b00;
+    outline: 2px solid colors.$amber-400;
     outline-offset: 2px;
 }
 
@@ -84,7 +86,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem 1.5rem;
-    color: #6f6a61;
+    color: colors.$stone-725;
     font-size: 0.875rem;
 }
 
@@ -102,30 +104,30 @@
     border: 0;
     border-bottom: 2px solid transparent;
     background: transparent;
-    color: #706b62;
+    color: colors.$stone-700;
     font-size: 0.82rem;
     font-weight: 600;
     white-space: nowrap;
 }
 
 .tab-button:hover {
-    color: #2c2924;
-    background: #f6f2e9;
+    color: colors.$stone-950;
+    background: colors.$cream-100;
 }
 
 .tab-button.active {
-    border-bottom-color: #c57b00;
-    color: #201f1c;
+    border-bottom-color: colors.$amber-400;
+    color: colors.$stone-975;
 }
 
 .grid-shell {
     overflow: auto;
     max-width: 100%;
     padding-bottom: 1rem;
-    border: 1px solid #ded8cd;
+    border: 1px solid colors.$stone-200;
     border-radius: 0.75rem;
-    background: white;
-    box-shadow: 0 0.4rem 1.5rem rgba(58, 43, 16, 0.06);
+    background: colors.$white;
+    box-shadow: 0 0.4rem 1.5rem colors.$grid-shadow;
 }
 
 .market-grid {
@@ -139,7 +141,7 @@
 .market-grid th,
 .market-grid td {
     padding: 0.75rem;
-    border-bottom: 1px solid #ebe6dd;
+    border-bottom: 1px solid colors.$cream-250;
     vertical-align: top;
     white-space: nowrap;
 }
@@ -148,8 +150,8 @@
     position: sticky;
     top: 0;
     z-index: 1;
-    background: #f6f2e9;
-    color: #5d574d;
+    background: colors.$cream-100;
+    color: colors.$stone-800;
     font-size: 0.68rem;
     letter-spacing: 0.055em;
     text-transform: uppercase;
@@ -160,7 +162,7 @@
 }
 
 .market-grid tbody tr:hover td {
-    background: #fffcf5;
+    background: colors.$cream-75;
 }
 
 .editable-row {
@@ -186,23 +188,23 @@
 
 .row-action-cell {
     z-index: 2;
-    background: white;
+    background: colors.$white;
 }
 
 .row-action-cell .form-check-input {
-    border-color: #5f584d;
-    background-color: #f2eee6;
-    box-shadow: 0 0 0 1px rgba(44, 38, 29, 0.12);
+    border-color: colors.$stone-775;
+    background-color: colors.$cream-150;
+    box-shadow: 0 0 0 1px colors.$control-shadow;
 }
 
 .row-action-cell .form-check-input:checked {
-    border-color: #8a5700;
-    background-color: #8a5700;
+    border-color: colors.$amber-600;
+    background-color: colors.$amber-600;
 }
 
 .row-action-cell .form-check-input:focus {
-    border-color: #8a5700;
-    box-shadow: 0 0 0 0.2rem rgba(197, 123, 0, 0.25);
+    border-color: colors.$amber-600;
+    box-shadow: 0 0 0 0.2rem colors.$focus-shadow;
 }
 
 .delete-row-button {
@@ -223,8 +225,8 @@
     position: sticky;
     left: 6.5rem;
     z-index: 1;
-    background: white;
-    color: #795000;
+    background: colors.$white;
+    color: colors.$amber-700;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-weight: 700;
 }
@@ -240,7 +242,7 @@ th:nth-child(2) {
 }
 
 .price {
-    color: #125d3e;
+    color: colors.$positive;
     font-weight: 800;
 }
 
@@ -251,7 +253,7 @@ th:nth-child(2) {
 }
 
 .missing-statistics {
-    color: #8a857c;
+    color: colors.$stone-550;
     font-style: italic;
     text-align: center;
 }
@@ -260,7 +262,7 @@ th:nth-child(2) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: #706b62;
+    color: colors.$stone-700;
     font-size: 0.85rem;
 }
 

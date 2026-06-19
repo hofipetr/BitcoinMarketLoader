@@ -1,9 +1,11 @@
 {
   "private": true,
   "scripts": {
-    "sass:build": "sass --update Components:Components wwwroot/app.scss:wwwroot/app.css"
+    "bootstrap:sync": "node tools/sync-bootstrap.mjs",
+    "sass:build": "sass --load-path=. --load-path=wwwroot/lib --update Components:Components wwwroot/app.scss:wwwroot/app.css"
   },
   "devDependencies": {
+    "bootstrap": "5.3.8",
     "sass": "1.101.0"
   }
 }

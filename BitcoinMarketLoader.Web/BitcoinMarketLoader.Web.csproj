@@ -13,10 +13,21 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+      <Content Include="..\LICENSE">
+        <Link>LICENSE</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Include="..\THIRD-PARTY-NOTICES.md">
+        <Link>THIRD-PARTY-NOTICES.md</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
     </ItemGroup>
 
     <ItemGroup>
-        <SassSource Include="Components\**\*.scss;wwwroot\**\*.scss" />
+        <SassSource Include="Components\**\*.scss;wwwroot\app.scss" />
+        <SassDependency Include="Styles\**\*.scss;wwwroot\lib\bootstrap\scss\**\*.scss" />
     </ItemGroup>
 
     <Target Name="RestoreSassDependencies"
@@ -29,7 +40,7 @@
     <Target Name="CompileSass"
             BeforeTargets="PrepareForBuild"
             DependsOnTargets="RestoreSassDependencies"
-            Inputs="@(SassSource)"
+            Inputs="@(SassSource);@(SassDependency)"
             Outputs="@(SassSource->'%(RootDir)%(Directory)%(Filename).css')">
         <Exec Command="npm run sass:build" />
     </Target>

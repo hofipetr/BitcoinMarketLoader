@@ -1,3 +1,5 @@
+@use "Styles/colors" as colors;
+
 .object-cell {
     display: grid;
     gap: 0.15rem;
@@ -5,5 +7,5 @@
 }
 
 .object-cell span {
-    color: #6f6a61;
+    color: colors.$stone-725;
 }

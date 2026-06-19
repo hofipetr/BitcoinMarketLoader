@@ -20,7 +20,7 @@
 }
 
 #components-reconnect-modal {
-  background-color: white;
+  background-color: #fff;
   width: 20rem;
   margin: 20vh auto;
   padding: 2rem;
@@ -81,7 +81,7 @@
 #components-reconnect-modal button {
   border: 0;
   background-color: #6b9ed2;
-  color: white;
+  color: #fff;
   padding: 4px 24px;
   border-radius: 4px;
 }
@@ -142,3 +142,5 @@
     opacity: 0;
   }
 }
+
+/*# sourceMappingURL=ReconnectModal.razor.css.map */

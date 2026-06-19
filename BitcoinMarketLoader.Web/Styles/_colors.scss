@@ -1,0 +1,70 @@
+// Brand and accent colors
+$amber-700: #795000;
+$amber-600: #8a5700;
+$amber-500: #8a5a00;
+$amber-400: #c57b00;
+
+// Warm neutral surfaces
+$cream-50: #fffdf8;
+$cream-75: #fffcf5;
+$cream-100: #f6f2e9;
+$cream-150: #f2eee6;
+$cream-200: #eee8dc;
+$cream-250: #ebe6dd;
+
+// Warm neutral borders
+$stone-200: #ded8cd;
+$stone-250: #d6cdbf;
+$stone-300: #cec6b9;
+
+// Warm neutral text
+$stone-500: #929292;
+$stone-550: #8a857c;
+$stone-600: #777168;
+$stone-625: #756f65;
+$stone-650: #746f66;
+$stone-675: #736d63;
+$stone-700: #706b62;
+$stone-725: #6f6a61;
+$stone-750: #5f5a50;
+$stone-775: #5f584d;
+$stone-800: #5d574d;
+$stone-900: #302b24;
+$stone-950: #2c2924;
+$stone-975: #201f1c;
+
+// Navigation
+$sidebar-start: #251b0b;
+$sidebar-end: #5d3b08;
+$nav-text: #d7d7d7;
+
+// Status and framework colors
+$link: #006bb7;
+$primary: #1b6ec2;
+$primary-border: #1861ac;
+$focus: #258cfb;
+$success: #26b050;
+$danger: #e50000;
+$danger-dark: #b32121;
+$positive: #125d3e;
+$reconnect: #6b9ed2;
+$reconnect-hover: #3b6ea2;
+$reconnect-ring: #0087ff;
+$warning-surface: lightyellow;
+
+// Base colors
+$white: #fff;
+
+// Shadows and translucent overlays
+$black-20: rgba(0, 0, 0, 0.2);
+$black-30: rgba(0, 0, 0, 0.3);
+$black-40: rgba(0, 0, 0, 0.4);
+$white-10: rgba(255, 255, 255, 0.1);
+$white-37: rgba(255, 255, 255, 0.37);
+$white-50: rgba(255, 255, 255, 0.5);
+$backdrop: rgba(35, 29, 20, 0.58);
+$modal-shadow: rgba(28, 22, 13, 0.3);
+$control-shadow: rgba(44, 38, 29, 0.12);
+$focus-shadow: rgba(197, 123, 0, 0.25);
+$segment-shadow: rgba(55, 39, 12, 0.18);
+$grid-shadow: rgba(58, 43, 16, 0.06);

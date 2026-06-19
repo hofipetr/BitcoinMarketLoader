@@ -1,0 +1,98 @@
+.note-editor-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(35, 29, 20, 0.58);
+}
+
+.note-editor {
+    display: grid;
+    gap: 1.25rem;
+    width: min(34rem, 100%);
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    padding: 1.5rem;
+    border: 1px solid #ded8cd;
+    border-radius: 0.85rem;
+    background: #fffdf8;
+    box-shadow: 0 1.5rem 4rem rgba(28, 22, 13, 0.3);
+}
+
+.eyebrow {
+    margin: 0 0 0.35rem;
+    color: #8a5a00;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.note-editor-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.note-editor-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 0;
+}
+
+.note-editor-details div {
+    min-width: 0;
+}
+
+.note-editor-details dt,
+.note-editor-field > span {
+    color: #736d63;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.note-editor-details dd {
+    margin: 0.25rem 0 0;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+}
+
+.note-editor-field {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.note-editor-field textarea {
+    resize: vertical;
+}
+
+.note-editor-field small {
+    justify-self: end;
+    color: #777168;
+}
+
+.note-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.note-editor-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.delete-note-button {
+    margin-right: auto;
+}
+
+@media (max-width: 520px) {
+    .note-editor-details {
+        grid-template-columns: 1fr;
+    }
+}

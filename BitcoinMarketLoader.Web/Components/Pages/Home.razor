@@ -8,15 +8,15 @@
 
 <PageTitle>BTC market ticks</PageTitle>
 
-<div class="market-page">
-    <div class="page-heading">
+<div class="app-page">
+    <div class="app-page-heading">
         <div>
-            <p class="eyebrow">Bitcoin market loader</p>
+            <p class="app-page-eyebrow">Bitcoin market loader</p>
             <h1>Market ticks</h1>
             <p class="text-secondary mb-0">Persisted CoinDesk BTC market data from the REST API.</p>
         </div>
 
-        <div class="controls">
+        <div class="app-page-controls">
             @if (isEditMode)
             {
                 <button type="button"
@@ -118,7 +118,7 @@
 
     @if (isLoading)
     {
-        <div class="state-panel">
+        <div class="app-state-panel">
             <div class="spinner-border spinner-border-sm" role="status"></div>
             <span>Loading market ticks...</span>
         </div>
@@ -132,7 +132,7 @@
     }
     else if (ticks.Count == 0)
     {
-        <div class="state-panel">No market ticks were returned for this page.</div>
+        <div class="app-state-panel">No market ticks were returned for this page.</div>
     }
     else if (activeTab == DetailsTab)
     {

@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "sass:build": "sass --update Components:Components wwwroot/app.scss:wwwroot/app.css"
+  },
+  "devDependencies": {
+    "sass": "1.101.0"
+  }
+}

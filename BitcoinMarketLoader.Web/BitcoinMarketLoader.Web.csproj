@@ -15,4 +15,23 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+        <SassSource Include="Components\**\*.scss;wwwroot\**\*.scss" />
+    </ItemGroup>
+
+    <Target Name="RestoreSassDependencies"
+            BeforeTargets="CompileSass"
+            Inputs="package-lock.json"
+            Outputs="node_modules\.package-lock.json">
+        <Exec Command="npm ci --cache &quot;$(BaseIntermediateOutputPath)npm-cache&quot;" />
+    </Target>
+
+    <Target Name="CompileSass"
+            BeforeTargets="PrepareForBuild"
+            DependsOnTargets="RestoreSassDependencies"
+            Inputs="@(SassSource)"
+            Outputs="@(SassSource->'%(RootDir)%(Directory)%(Filename).css')">
+        <Exec Command="npm run sass:build" />
+    </Target>
+
 </Project>

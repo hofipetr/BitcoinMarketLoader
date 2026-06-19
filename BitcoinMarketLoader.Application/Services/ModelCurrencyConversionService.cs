@@ -9,7 +9,7 @@ public class ModelCurrencyConversionService(
     ICzkExchangeRateService exchangeRateService,
     ILogger<ModelCurrencyConversionService> logger): IModelCurrencyConversionService
 {
-    const string EurCode = "EUR";
+    private const string EurCode = "EUR";
     static readonly MarketCurrency CzkCurrency = new MarketCurrency { Name = "CZK" };
     
     public async Task<bool> ConvertEurToCzk(MarketTick model)

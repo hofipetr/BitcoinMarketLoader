@@ -3,8 +3,8 @@ using BitcoinMarketLoader.Application.Services;
 using BitcoinMarketLoader.Domain.Market;
 using BitcoinMarketLoader.Infrastructure.Databases;
 using BitcoinMarketLoader.Infrastructure.Databases.InMemory;
-using BitcoinMarketLoader.Infrastructure.Dtos.MarketTickDtos;
 using BitcoinMarketLoader.Infrastructure.Http;
+using BitcoinMarketLoader.UnitTests.Mocks;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
@@ -12,7 +12,7 @@ namespace BitcoinMarketLoader.UnitTests.Services;
 
 public class BitCoinDataServiceTests
 {
-    private readonly IMarketRepository _repository = new InMemoryMarketRepository([CreateMarketTick(1)]);
+    private readonly IMarketRepository _repository = new InMemoryMarketRepository([MockHelper.CreateMarketTick(1)]);
     private readonly IModelCurrencyConversionService _modelCurrencyConversionService = Substitute.For<IModelCurrencyConversionService>();
     private readonly ICoinDeskClient _coinDeskClient = Substitute.For<ICoinDeskClient>();
     
@@ -54,7 +54,7 @@ public class BitCoinDataServiceTests
     public async Task FetchLatestPersistsEurBeforeConvertingResponseToCzk()
     {
         // Arrange
-        var tick = CreateMarketTickDto(Random.Shared.Next());
+        var tick = MockHelper.CreateMarketTickDto(Random.Shared.Next());
         _coinDeskClient.GetLatestSpotTickAsync(Arg.Any<string>(), Arg.Any<ICollection<string>>())
             .Returns(tick);
         
@@ -63,8 +63,8 @@ public class BitCoinDataServiceTests
 
         // Assert
         Assert.NotNull(tick.Data);
-        Assert.Contains("BTC-EUR", tick.Data);
-        var btcData = tick.Data["BTC-EUR"];
+        Assert.Contains(MockHelper.DefaultInstrumentName, tick.Data);
+        var btcData = tick.Data[MockHelper.DefaultInstrumentName];
 
         Assert.NotNull(result);
         Assert.Equal(btcData.Ccseq, result.Ccseq);
@@ -79,53 +79,43 @@ public class BitCoinDataServiceTests
     }
 
     [Fact]
-    public async Task DeleteMarketTickRemovesPersistedTick()
+    public async Task DeleteMarketTick_RemovesPersistedTick()
     {
-        Assert.True(await _sut.DeleteBtcMarketTickAsync(1));
-        Assert.Null(await _repository.GetMarketTick(1));
-        Assert.False(await _sut.DeleteBtcMarketTickAsync(1));
+        // arrange
+        var tick = MockHelper.CreateMarketTick(Random.Shared.Next());
+        await _repository.AddMarketTick(tick);
+        
+        // act
+        var fetchedBeforeDelete = await _sut.GetBtcMarketTickAsync(tick.Ccseq, CurrencyCodes.EUR);
+        var deletedTick = await _sut.DeleteBtcMarketTickAsync(tick.Ccseq);
+        var fetchedAfterDelete = await _sut.GetBtcMarketTickAsync(tick.Ccseq, CurrencyCodes.EUR);
+        var deletedTickAgain = await _sut.DeleteBtcMarketTickAsync(tick.Ccseq);
+        
+        // assert
+        Assert.NotNull(fetchedBeforeDelete);
+        Assert.True(deletedTick);
+        Assert.Null(fetchedAfterDelete);
+        Assert.False(deletedTickAgain);
     }
 
     [Fact]
-    public async Task DeleteMarketTicksReturnsNumberOfRemovedTicks()
+    public async Task DeleteMarketTicks_ReturnsNumberOfRemovedTicks()
     {
-        await _repository.AddMarketTick(CreateMarketTick(2));
-        await _repository.AddMarketTick(CreateMarketTick(3));
+        // arrange
+        await _repository.AddMarketTick(MockHelper.CreateMarketTick(2));
+        await _repository.AddMarketTick(MockHelper.CreateMarketTick(3));
+        await _repository.AddMarketTick(MockHelper.CreateMarketTick(4));
 
-        var deletedCount = await _sut.DeleteBtcMarketTicksAsync([1, 3, 999]);
+        // act
+        var deletedCount = await _sut.DeleteBtcMarketTicksAsync([2, 3, 999]);
+        var fetchedTick2 = await _sut.GetBtcMarketTickAsync(2, CurrencyCodes.EUR);
+        var fetchedTick3 = await _sut.GetBtcMarketTickAsync(3, CurrencyCodes.EUR);
+        var fetchedTick4 = await _sut.GetBtcMarketTickAsync(4, CurrencyCodes.EUR);
 
+        // assert
         Assert.Equal(2, deletedCount);
-        Assert.NotNull(await _repository.GetMarketTick(2));
+        Assert.Null(fetchedTick2); // should be deleted
+        Assert.Null(fetchedTick3); // should be deleted
+        Assert.NotNull(fetchedTick4); // should remain in DB
     }
-
-    private static MarketTick CreateMarketTick(long ccseq) =>
-        new()
-        {
-            Ccseq = ccseq,
-            GeneratedTimestamp = DateTime.UtcNow,
-            Market = "coinbase",
-            Instrument = "BTC-EUR",
-            BaseCurrency = new MarketCurrency { Id = 1, Name = "BTC" },
-            QuoteCurrency = new MarketCurrency { Id = 2, Name = "EUR" },
-            Price = 10m,
-        };
-
-    private static MarketTickDto CreateMarketTickDto(long ccseq) =>
-        new()
-        {
-            Data = new Dictionary<string, InstrumentDataDto>
-            {
-                ["BTC-EUR"] = new()
-                {
-                    Ccseq = ccseq,
-                    Market = "coinbase",
-                    Instrument = "BTC-EUR",
-                    Base = "BTC",
-                    BaseId = 1,
-                    Quote = "EUR",
-                    QuoteId = 2,
-                    Price = 10m,
-                },
-            },
-        };
 }

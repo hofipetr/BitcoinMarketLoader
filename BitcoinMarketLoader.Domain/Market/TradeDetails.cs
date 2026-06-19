@@ -7,7 +7,7 @@ namespace BitcoinMarketLoader.Domain.Market;
 public class TradeDetails
 {
     [Key]
-    public required long Ccseq { get; set; }
+    public long Ccseq { get; set; }
 
     public string? TradeId { get; set; }
     
